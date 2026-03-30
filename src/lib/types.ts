@@ -1,4 +1,4 @@
-import { Square, Color, PieceSymbol } from "chess.js";
+import { Square, Color } from "chess.js";
 
 export type GameMode = "opening-trainer" | "guided-play" | "free-play";
 
