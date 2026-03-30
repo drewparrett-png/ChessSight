@@ -11,10 +11,14 @@ export function useStockfish() {
 
   useEffect(() => {
     let mounted = true;
-    createStockfish().then((engine) => {
-      if (mounted) { engineRef.current = engine; setIsReady(true); }
-      else { engine.destroy(); }
-    });
+    createStockfish()
+      .then((engine) => {
+        if (mounted) { engineRef.current = engine; setIsReady(true); }
+        else { engine.destroy(); }
+      })
+      .catch((err) => {
+        console.warn("Stockfish failed to initialize:", err);
+      });
     return () => { mounted = false; engineRef.current?.destroy(); };
   }, []);
 
