@@ -37,6 +37,8 @@ The tooltip disappears on mouseout and does not interfere with click-to-move.
 
 The combined "Control Map" view is the primary mode because it answers the actionable question. Per-side attack views are available via hover tooltip on individual squares.
 
+**Required data model change:** The current `useSight` hook and `AttackMap` type return only integer attacker counts per square (`Record<Square, number>`). The tooltip requires knowing *which* pieces attack each square. `calculateAttackMap` in `src/lib/sight.ts` must be extended to return piece-level attacker info (piece type + source square) alongside counts. The `AttackMap` type becomes something like `Record<Square, { count: number; pieces: Array<{ piece: PieceSymbol; from: Square }> }>`.
+
 **Why this design:**
 - Preserves light/dark square distinction (critical for chess vision — players think in terms of light-square vs dark-square control)
 - The inner border provides quick spatial scanning without obscuring the board
@@ -64,6 +66,8 @@ The combined "Control Map" view is the primary mode because it answers the actio
 
 Sidebar toggles, eval display, and game controls work identically in both modes.
 
+**Type changes:** The `GameMode` type changes from `"opening-trainer" | "guided-play" | "free-play"` to `"opening-drill" | "play"`. The `ToggleState` type changes from `{ mySight, opponentSight, bookMoves, evalBar }` to `{ controlMap, bookMoves, evalBar }` (all booleans). Both types are referenced across multiple components (`page.tsx`, `Board`, `Sidebar`, `OverlayToggles`, `ModeSelector`) and all consumers must be updated.
+
 ### 3. Enhanced Break Detection & What-If Exploration
 
 **Upgraded break detection modal (Opening Drill only):**
@@ -76,7 +80,7 @@ When the user plays a non-book move:
    - Mistake (100–200cp loss) — orange
    - Blunder (> 200cp loss) — red
 2. **Side-by-side comparison** — user's move with eval vs best book move with eval (same as today but with clearer labels)
-3. **"Why?" line preview** — engine's top continuation (3–5 moves) for both the user's move and the book move, shown in algebraic notation
+3. **"Why?" line preview** — engine's top continuation (3–5 moves) for both the user's move and the book move, shown in algebraic notation. **Note:** The current `useStockfish` hook only returns eval scores and best move, not principal variation (PV) lines. The hook must be extended to parse PV data from the Stockfish `info` output (the `pv` field in UCI protocol) and expose it as an array of moves.
 4. **Three actions:**
    - **Try Again** — undoes the move, returns to the position (same as today)
    - **Next Opening** — starts a new drill (same as today)
@@ -95,7 +99,7 @@ When the user clicks "Explore":
 
 **Data model — what gets tracked per drill session:**
 - Opening name and ECO code
-- Variation path (e.g., Queen's Gambit → Declined → Orthodox Defense)
+- Variation path (e.g., Queen's Gambit → Declined → Orthodox Defense). **Note:** The current `BookEntry` type only stores a flat `openingName` and `eco` code — there is no hierarchical variation data. The variation path will be derived by parsing `openingName` strings heuristically (e.g., "Queen's Gambit Declined: Orthodox Defense" → ["Queen's Gambit", "Declined", "Orthodox Defense"]). This is imperfect but sufficient; the opening book data can be restructured later for more accuracy.
 - Depth reached before breaking from book (or "completed" if the full line was played)
 - Move quality at the break point (OK / Inaccuracy / Mistake / Blunder)
 - Timestamp
@@ -107,7 +111,7 @@ Replaces the current "Opening Info" card with a richer display:
 - ✓ for lines completed without breaking
 - ⚠️ for lines where the user consistently breaks (weak spots)
 - Coverage indicator: "You've explored X of Y openings in the book"
-- **"Suggest Drill"** button — picks the least-practiced opening or one where the user keeps breaking. Simple heuristic, not spaced repetition.
+- **"Suggest Drill"** button — picks the least-practiced opening or one where the user keeps breaking. Tiebreaker: prefer weak-spot openings (high break rate) over merely least-practiced ones. Simple heuristic, not spaced repetition.
 
 **Storage abstraction:**
 - A `RepertoireStore` interface with methods: `save(session)`, `getStats()`, `getOpeningHistory(eco?)`, `clear()`
