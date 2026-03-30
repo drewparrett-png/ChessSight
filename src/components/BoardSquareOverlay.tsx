@@ -12,6 +12,7 @@ interface BoardSquareOverlayProps {
   showOpponentSight: boolean;
   showBookMoves: boolean;
   playerColor: "w" | "b";
+  bookOpeningName?: string;
 }
 
 function SightDots({ count, color }: { count: number; color: string }) {
@@ -43,6 +44,7 @@ export function BoardSquareOverlay({
   showOpponentSight,
   showBookMoves,
   playerColor,
+  bookOpeningName,
 }: BoardSquareOverlayProps) {
   const myAttacks = playerColor === "w" ? whiteAttacks : blackAttacks;
   const oppAttacks = playerColor === "w" ? blackAttacks : whiteAttacks;
@@ -86,7 +88,9 @@ export function BoardSquareOverlay({
             left: 1,
             fontSize: 10,
             lineHeight: 1,
+            cursor: "help",
           }}
+          title={bookOpeningName ?? "Book move"}
         >
           📖
         </div>

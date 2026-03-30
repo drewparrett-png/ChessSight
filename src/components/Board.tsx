@@ -28,10 +28,10 @@ export function Board({
   playerColor,
   boardWidth = 480,
 }: BoardProps) {
-  // Build set of squares that have book moves
-  const bookSquares = new Set<string>();
+  // Build map from target square to opening name for tooltip
+  const bookSquareMap = new Map<string, string>();
   for (const entry of bookMoves) {
-    bookSquares.add(entry.move);
+    bookSquareMap.set(entry.move, entry.openingName);
   }
 
   function handlePieceDrop({ sourceSquare, targetSquare }: PieceDropHandlerArgs): boolean {
@@ -48,11 +48,12 @@ export function Board({
           square={square as Square}
           whiteAttacks={attackMap.white[square as Square] ?? 0}
           blackAttacks={attackMap.black[square as Square] ?? 0}
-          isBookMove={bookSquares.has(square)}
+          isBookMove={bookSquareMap.has(square)}
           showMySight={toggles.mySight}
           showOpponentSight={toggles.opponentSight}
           showBookMoves={toggles.bookMoves}
           playerColor={playerColor}
+          bookOpeningName={bookSquareMap.get(square)}
         />
       </div>
     );
