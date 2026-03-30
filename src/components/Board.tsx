@@ -1,6 +1,7 @@
 "use client";
 
 import { Chessboard } from "react-chessboard";
+import { PieceDropHandlerArgs, SquareRenderer } from "react-chessboard";
 import { Square } from "chess.js";
 import { BoardSquareOverlay } from "./BoardSquareOverlay";
 import { EvalBar } from "./EvalBar";
@@ -29,46 +30,24 @@ export function Board({
 }: BoardProps) {
   // Build set of squares that have book moves
   const bookSquares = new Set<string>();
-  // We need to map SAN moves to target squares
-  // For now, book moves are shown by their target square
-  // The parent component should pass resolved target squares
   for (const entry of bookMoves) {
-    // Extract target square from SAN — simplified approach
-    // Full SAN parsing happens in the parent
     bookSquares.add(entry.move);
   }
 
-  function onDrop(sourceSquare: string, targetSquare: string): boolean {
+  function handlePieceDrop({ sourceSquare, targetSquare }: PieceDropHandlerArgs): boolean {
+    if (!targetSquare) return false;
     return onMove(sourceSquare as Square, targetSquare as Square);
   }
 
-  // Build custom square renderers for overlays
-  const customSquareStyles: Record<string, React.CSSProperties> = {};
-
-  const allSquares: Square[] = [];
-  for (const file of "abcdefgh") {
-    for (const rank of "12345678") {
-      allSquares.push(`${file}${rank}` as Square);
-    }
-  }
-
-  // Custom square renderer using react-chessboard's customSquare
-  function CustomSquareRenderer({
-    children,
-    square,
-    style,
-  }: {
-    children: React.ReactNode;
-    square: Square;
-    style: React.CSSProperties;
-  }) {
+  // Custom square renderer using react-chessboard's squareRenderer
+  const squareRenderer: SquareRenderer = ({ square, children }) => {
     return (
-      <div style={{ ...style, position: "relative" }}>
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
         {children}
         <BoardSquareOverlay
-          square={square}
-          whiteAttacks={attackMap.white[square] ?? 0}
-          blackAttacks={attackMap.black[square] ?? 0}
+          square={square as Square}
+          whiteAttacks={attackMap.white[square as Square] ?? 0}
+          blackAttacks={attackMap.black[square as Square] ?? 0}
           isBookMove={bookSquares.has(square)}
           showMySight={toggles.mySight}
           showOpponentSight={toggles.opponentSight}
@@ -77,21 +56,22 @@ export function Board({
         />
       </div>
     );
-  }
+  };
 
   return (
     <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
       <EvalBar evaluation={evaluation} visible={toggles.evalBar} />
-      <div>
+      <div style={{ width: boardWidth }}>
         <Chessboard
-          id="chesssight-board"
-          position={fen}
-          onPieceDrop={onDrop}
-          boardWidth={boardWidth}
-          customDarkSquareStyle={{ backgroundColor: "var(--board-dark)" }}
-          customLightSquareStyle={{ backgroundColor: "var(--board-light)" }}
-          boardOrientation={playerColor === "w" ? "white" : "black"}
-          customSquare={CustomSquareRenderer as any}
+          options={{
+            position: fen,
+            boardOrientation: playerColor === "w" ? "white" : "black",
+            darkSquareStyle: { backgroundColor: "var(--board-dark)" },
+            lightSquareStyle: { backgroundColor: "var(--board-light)" },
+            boardStyle: { width: boardWidth, height: boardWidth },
+            onPieceDrop: handlePieceDrop,
+            squareRenderer,
+          }}
         />
       </div>
     </div>
