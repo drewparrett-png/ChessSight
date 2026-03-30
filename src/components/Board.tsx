@@ -50,7 +50,6 @@ export function Board({
     return (
       <div
         style={{ position: "relative", width: "100%", height: "100%", ...extraStyle }}
-        onClick={() => onSquareClick?.(square as Square)}
       >
         {children}
         <BoardSquareOverlay
