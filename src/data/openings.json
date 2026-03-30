@@ -1,0 +1,152 @@
+{
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1": {
+    "moves": [
+      { "move": "e4", "openingName": "King's Pawn Opening", "eco": "B00" },
+      { "move": "d4", "openingName": "Queen's Pawn Opening", "eco": "A40" },
+      { "move": "Nf3", "openingName": "Réti Opening", "eco": "A04" },
+      { "move": "c4", "openingName": "English Opening", "eco": "A10" }
+    ]
+  },
+  "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1": {
+    "moves": [
+      { "move": "c5", "openingName": "Sicilian Defense", "eco": "B20" },
+      { "move": "e5", "openingName": "Open Game", "eco": "C20" },
+      { "move": "e6", "openingName": "French Defense", "eco": "C00" },
+      { "move": "c6", "openingName": "Caro-Kann Defense", "eco": "B10" },
+      { "move": "d5", "openingName": "Scandinavian Defense", "eco": "B01" }
+    ]
+  },
+  "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1": {
+    "moves": [
+      { "move": "d5", "openingName": "Queen's Gambit", "eco": "D06" },
+      { "move": "Nf6", "openingName": "Indian Defense", "eco": "A45" },
+      { "move": "f5", "openingName": "Dutch Defense", "eco": "A80" }
+    ]
+  },
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2": {
+    "moves": [
+      { "move": "Nf3", "openingName": "Open Sicilian", "eco": "B21" },
+      { "move": "Nc3", "openingName": "Closed Sicilian", "eco": "B23" },
+      { "move": "c3", "openingName": "Alapin Variation", "eco": "B22" }
+    ]
+  },
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2": {
+    "moves": [
+      { "move": "Nf3", "openingName": "King's Knight Opening", "eco": "C44" },
+      { "move": "f4", "openingName": "King's Gambit", "eco": "C30" },
+      { "move": "Bc4", "openingName": "Bishop's Opening", "eco": "C23" }
+    ]
+  },
+  "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2": {
+    "moves": [
+      { "move": "d4", "openingName": "French Defense: Main Line", "eco": "C01" },
+      { "move": "d3", "openingName": "French Defense: King's Indian Attack", "eco": "C00" }
+    ]
+  },
+  "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2": {
+    "moves": [
+      { "move": "d4", "openingName": "Caro-Kann Defense: Main Line", "eco": "B12" },
+      { "move": "Nc3", "openingName": "Caro-Kann Defense: Two Knights", "eco": "B11" }
+    ]
+  },
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2": {
+    "moves": [
+      { "move": "Nc6", "openingName": "King's Knight Opening: Normal Variation", "eco": "C44" },
+      { "move": "Nf6", "openingName": "Petrov's Defense", "eco": "C42" },
+      { "move": "d6", "openingName": "Philidor Defense", "eco": "C41" }
+    ]
+  },
+  "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3": {
+    "moves": [
+      { "move": "Bb5", "openingName": "Ruy Lopez", "eco": "C60" },
+      { "move": "Bc4", "openingName": "Italian Game", "eco": "C50" },
+      { "move": "d4", "openingName": "Scotch Game", "eco": "C44" }
+    ]
+  },
+  "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 3": {
+    "moves": [
+      { "move": "a6", "openingName": "Ruy Lopez: Morphy Defense", "eco": "C60" },
+      { "move": "Nf6", "openingName": "Ruy Lopez: Berlin Defense", "eco": "C65" },
+      { "move": "f5", "openingName": "Ruy Lopez: Schliemann Defense", "eco": "C63" }
+    ]
+  },
+  "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 2 3": {
+    "moves": [
+      { "move": "Bc5", "openingName": "Italian Game: Giuoco Piano", "eco": "C50" },
+      { "move": "Nf6", "openingName": "Italian Game: Two Knights Defense", "eco": "C55" }
+    ]
+  },
+  "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 1 2": {
+    "moves": [
+      { "move": "c4", "openingName": "Indian Defense: Queen's Indian", "eco": "E12" },
+      { "move": "Nf3", "openingName": "Indian Defense: Torre Attack", "eco": "A46" }
+    ]
+  },
+  "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq d6 0 2": {
+    "moves": [
+      { "move": "c4", "openingName": "Queen's Gambit", "eco": "D06" },
+      { "move": "Nf3", "openingName": "London System", "eco": "D02" }
+    ]
+  },
+  "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq c3 0 2": {
+    "moves": [
+      { "move": "dxc4", "openingName": "Queen's Gambit Accepted", "eco": "D20" },
+      { "move": "e6", "openingName": "Queen's Gambit Declined", "eco": "D30" },
+      { "move": "c6", "openingName": "Slav Defense", "eco": "D10" },
+      { "move": "Nf6", "openingName": "Marshall Defense", "eco": "D06" }
+    ]
+  },
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2": {
+    "moves": [
+      { "move": "d6", "openingName": "Sicilian Defense: Old Sicilian", "eco": "B50" },
+      { "move": "Nc6", "openingName": "Sicilian Defense: Old Sicilian", "eco": "B30" },
+      { "move": "e6", "openingName": "Sicilian Defense: Kan Variation", "eco": "B41" },
+      { "move": "g6", "openingName": "Sicilian Defense: Accelerated Dragon", "eco": "B34" }
+    ]
+  },
+  "rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3": {
+    "moves": [
+      { "move": "d4", "openingName": "Sicilian Defense: Open", "eco": "B50" }
+    ]
+  },
+  "rnbqkbnr/pp2pppp/3p4/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq d3 0 3": {
+    "moves": [
+      { "move": "cxd4", "openingName": "Sicilian Defense: Open Variation", "eco": "B50" }
+    ]
+  },
+  "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4": {
+    "moves": [
+      { "move": "Nxd4", "openingName": "Sicilian Defense: Open Variation", "eco": "B50" }
+    ]
+  },
+  "r1bqkbnr/pp2pppp/2np4/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5": {
+    "moves": [
+      { "move": "Nc3", "openingName": "Sicilian Defense: Classical Variation", "eco": "B56" },
+      { "move": "c4", "openingName": "Sicilian Defense: Maroczy Bind", "eco": "B56" },
+      { "move": "Be3", "openingName": "Sicilian Defense: English Attack", "eco": "B80" }
+    ]
+  },
+  "r1bqkbnr/1p2pppp/p1np4/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6": {
+    "moves": [
+      { "move": "Bg5", "openingName": "Sicilian Defense: Najdorf, English Attack", "eco": "B90" },
+      { "move": "Be3", "openingName": "Sicilian Defense: Najdorf, English Attack", "eco": "B90" },
+      { "move": "Be2", "openingName": "Sicilian Defense: Najdorf, Classical", "eco": "B92" },
+      { "move": "f4", "openingName": "Sicilian Defense: Najdorf, f4 Attack", "eco": "B93" },
+      { "move": "Bc4", "openingName": "Sicilian Defense: Najdorf, Fischer-Sozin Attack", "eco": "B94" }
+    ]
+  },
+  "r1bqkbnr/pp3ppp/2npp3/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6": {
+    "moves": [
+      { "move": "Be3", "openingName": "Sicilian Defense: Scheveningen, English Attack", "eco": "B80" },
+      { "move": "g4", "openingName": "Sicilian Defense: Scheveningen, Keres Attack", "eco": "B81" },
+      { "move": "Be2", "openingName": "Sicilian Defense: Scheveningen, Classical", "eco": "B83" }
+    ]
+  },
+  "r1bqkbnr/pp2pp1p/2np2p1/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6": {
+    "moves": [
+      { "move": "Be3", "openingName": "Sicilian Defense: Dragon, Yugoslav Attack", "eco": "B75" },
+      { "move": "Be2", "openingName": "Sicilian Defense: Dragon, Classical", "eco": "B74" },
+      { "move": "f4", "openingName": "Sicilian Defense: Dragon, Levenfish Attack", "eco": "B71" }
+    ]
+  }
+}
