@@ -1289,6 +1289,12 @@ export function useStockfish() {
     setEvaluation(result);
   }, []);
 
+  /** Evaluate a position and return the result directly (doesn't update state) */
+  const evaluateRaw = useCallback(async (fen: string): Promise<{ score: number; mate?: number } | null> => {
+    if (!engineRef.current) return null;
+    return engineRef.current.evaluate(fen);
+  }, []);
+
   const getBestMove = useCallback(async (fen: string): Promise<string | null> => {
     if (!engineRef.current) return null;
     return engineRef.current.getBestMove(fen);
@@ -1302,6 +1308,7 @@ export function useStockfish() {
     isReady,
     evaluation,
     evaluate,
+    evaluateRaw,
     getBestMove,
     setElo,
   };
@@ -2150,7 +2157,7 @@ Replace `src/app/page.tsx`:
 ```tsx
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { Board } from "@/components/Board";
 import { Sidebar } from "@/components/Sidebar";
@@ -2159,7 +2166,7 @@ import { useGame } from "@/hooks/useGame";
 import { useStockfish } from "@/hooks/useStockfish";
 import { useOpeningBook } from "@/hooks/useOpeningBook";
 import { useSight } from "@/hooks/useSight";
-import { GameMode, ToggleState } from "@/lib/types";
+import { GameMode, ToggleState, BookEntry, EvalResult } from "@/lib/types";
 
 export default function Home() {
   const [mode, setMode] = useState<GameMode>("guided-play");
@@ -2173,7 +2180,7 @@ export default function Home() {
   });
 
   const { gameState, makeMove, makeMoveFromSan, undoMove, resetGame, getChess } = useGame();
-  const { isReady: engineReady, evaluation, evaluate, getBestMove, setElo: setEngineElo } = useStockfish();
+  const { isReady: engineReady, evaluation, evaluate, evaluateRaw, getBestMove, setElo: setEngineElo } = useStockfish();
   const { bookMoves, currentOpening, eco, fetchBookMoves } = useOpeningBook();
   const attackMap = useSight(getChess());
 
@@ -2532,71 +2539,9 @@ const [breakInfo, setBreakInfo] = useState<{
   bookMoveEval: EvalResult;
 } | null>(null);
 
-// Store book moves at time of player's move (before they change)
-const bookMovesAtMoveTime = useRef<BookEntry[]>([]);
 ```
 
-Update the `handleMove` callback to detect breaks in Opening Trainer:
-```tsx
-const handleMove = useCallback(
-  (from: Square, to: Square): boolean => {
-    if (mode === "opening-trainer") {
-      // Snapshot current book moves before making the move
-      bookMovesAtMoveTime.current = [...bookMoves];
-      const isBookMove = bookMoves.some((b) => {
-        // Resolve the SAN to check if it matches this from→to
-        const clone = new Chess(gameState.fen);
-        try {
-          const resolved = clone.move(b.move);
-          return resolved && resolved.from === from && resolved.to === to;
-        } catch {
-          return false;
-        }
-      });
-
-      const success = makeMove(from, to);
-      if (!success) return false;
-
-      if (!isBookMove) {
-        // Player broke book — evaluate both the user's move and the first book move
-        const evalUserMove = async () => {
-          const userEval = await engineReady
-            ? engineRef.current?.evaluate(gameState.fen) ?? { score: 0 }
-            : { score: 0 };
-
-          // Evaluate what position the book move would have led to
-          let bookEval: EvalResult = { score: 0 };
-          if (bookMovesAtMoveTime.current.length > 0) {
-            const clone = new Chess(gameState.fen);
-            // gameState.fen is now BEFORE the user's move (it updates async)
-            // We need to get the eval from the position AFTER book move
-            try {
-              // Undo user's move to get back to pre-move position
-              // Then play the book move and evaluate
-              // Actually: simpler — just evaluate current position (after user move)
-              // vs clone with book move
-            } catch {}
-          }
-
-          setBreakInfo({
-            userMove: chess.history().slice(-1)[0] ?? "?",
-            availableBookMoves: bookMovesAtMoveTime.current,
-            userMoveEval: userEval as EvalResult,
-            bookMoveEval: bookEval,
-          });
-        };
-        evalUserMove();
-      }
-      return true;
-    }
-
-    return makeMove(from, to);
-  },
-  [makeMove, mode, bookMoves, gameState.fen, engineReady]
-);
-```
-
-**Simplified approach** — since the evaluation comparison requires async Stockfish calls that complicate the move handler, use this cleaner pattern instead. Replace the `handleMove` above with:
+**Break detection logic** — use `evaluateRaw` (returns the result directly) to compare both positions async after the move. Replace the `handleMove` above with:
 
 ```tsx
 // Track whether a break just occurred
@@ -2642,29 +2587,31 @@ useEffect(() => {
   setPendingBreakCheck(false);
 
   const detectBreak = async () => {
-    // Evaluate current position (after user's non-book move)
-    const userEval = await evaluate(gameState.fen).then(() => evaluation);
+    // 1. Evaluate position after user's non-book move (current FEN)
+    const userEval = await evaluateRaw(gameState.fen) ?? { score: 0 };
 
-    // Evaluate what would have happened with the first book move
+    // 2. Evaluate position after the first book move would have been played
     const clone = new Chess(preBreakFen.current);
     const firstBookMove = preBreakBookMoves.current[0];
     let bookEval: EvalResult = { score: 0 };
     try {
       clone.move(firstBookMove.move);
-      // Use a second evaluate call for the book position
-      // For simplicity, use the current eval as comparison
-    } catch {}
+      bookEval = await evaluateRaw(clone.fen()) ?? { score: 0 };
+    } catch {
+      // If book move can't be played, leave bookEval at 0
+    }
 
     const chess = getChess();
+    const history = chess.history();
     setBreakInfo({
-      userMove: chess.history().slice(-1)[0] ?? "?",
+      userMove: history[history.length - 1] ?? "?",
       availableBookMoves: preBreakBookMoves.current,
-      userMoveEval: evaluation,
+      userMoveEval: userEval,
       bookMoveEval: bookEval,
     });
   };
   detectBreak();
-}, [pendingBreakCheck, engineReady, gameState.fen, evaluation, evaluate, getChess]);
+}, [pendingBreakCheck, engineReady, gameState.fen, evaluateRaw, getChess]);
 ```
 
 Add the modal render in the JSX return, before closing `</main>`:
