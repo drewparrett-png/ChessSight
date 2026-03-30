@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { BreakDetectionModal } from "@/components/BreakDetectionModal";
 import { Chess, Square } from "chess.js";
 import { Board } from "@/components/Board";
@@ -22,6 +22,7 @@ export default function Home() {
     bookMoves: true,
     evalBar: true,
   });
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
 
   const { gameState, makeMove, makeMoveFromSan, undoMove, resetGame, getChess } = useGame();
   const { isReady: engineReady, evaluation, evaluate, evaluateRaw, getBestMove, setElo: setEngineElo } = useStockfish();
@@ -115,12 +116,17 @@ export default function Home() {
         }
 
         const success = makeMove(from, to);
-        if (success && !isBookMove && preBreakBookMoves.current.length > 0) {
-          setPendingBreakCheck(true);
+        if (success) {
+          setSelectedSquare(null);
+          if (!isBookMove && preBreakBookMoves.current.length > 0) {
+            setPendingBreakCheck(true);
+          }
         }
         return success;
       }
-      return makeMove(from, to);
+      const success = makeMove(from, to);
+      if (success) setSelectedSquare(null);
+      return success;
     },
     [makeMove, mode, bookMoves, gameState.fen]
   );
@@ -173,6 +179,55 @@ export default function Home() {
     resetGame();
   }, [resetGame]);
 
+  // Legal moves for selected piece (click-to-move)
+  const legalMoves = useMemo(() => {
+    if (!selectedSquare) return [];
+    const chess = new Chess(gameState.fen);
+    return chess.moves({ square: selectedSquare, verbose: true });
+  }, [selectedSquare, gameState.fen]);
+
+  const legalMoveSquareStyles = useMemo(() => {
+    const styles: Record<string, React.CSSProperties> = {};
+    if (selectedSquare) {
+      styles[selectedSquare] = {
+        backgroundColor: "rgba(255, 255, 0, 0.4)",
+      };
+    }
+    for (const move of legalMoves) {
+      const isCapture = move.captured;
+      styles[move.to] = {
+        background: isCapture
+          ? "radial-gradient(circle, transparent 55%, rgba(0,0,0,0.3) 55%)"
+          : "radial-gradient(circle, rgba(0,0,0,0.25) 25%, transparent 25%)",
+        cursor: "pointer",
+      };
+    }
+    return styles;
+  }, [selectedSquare, legalMoves]);
+
+  const handleSquareClick = useCallback(
+    (square: Square) => {
+      // If a piece is selected and this square is a legal move, make the move
+      if (selectedSquare) {
+        const isLegalTarget = legalMoves.some((m) => m.to === square);
+        if (isLegalTarget) {
+          handleMove(selectedSquare, square);
+          setSelectedSquare(null);
+          return;
+        }
+      }
+      // Check if this square has one of our pieces
+      const chess = new Chess(gameState.fen);
+      const piece = chess.get(square);
+      if (piece && piece.color === playerColor) {
+        setSelectedSquare(square === selectedSquare ? null : square);
+      } else {
+        setSelectedSquare(null);
+      }
+    },
+    [selectedSquare, legalMoves, handleMove, gameState.fen, playerColor]
+  );
+
   const isInBook = bookMoves.length > 0;
   const moveCount = gameState.moveHistory.length;
 
@@ -208,6 +263,8 @@ export default function Home() {
         <Board
           fen={gameState.fen}
           onMove={handleMove}
+          onSquareClick={handleSquareClick}
+          squareStyles={legalMoveSquareStyles}
           attackMap={attackMap}
           bookMoves={bookEntriesForBoard}
           evaluation={evaluation}

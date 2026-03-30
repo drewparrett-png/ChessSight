@@ -1,7 +1,8 @@
 "use client";
 
+import React from "react";
 import { Chessboard } from "react-chessboard";
-import { PieceDropHandlerArgs, SquareRenderer } from "react-chessboard";
+import { PieceDropHandlerArgs, SquareRenderer, SquareHandlerArgs } from "react-chessboard";
 import { Square } from "chess.js";
 import { BoardSquareOverlay } from "./BoardSquareOverlay";
 import { EvalBar } from "./EvalBar";
@@ -10,6 +11,8 @@ import { AttackMap, BookEntry, EvalResult, ToggleState } from "@/lib/types";
 interface BoardProps {
   fen: string;
   onMove: (from: Square, to: Square) => boolean;
+  onSquareClick?: (square: Square) => void;
+  squareStyles?: Record<string, React.CSSProperties>;
   attackMap: AttackMap;
   bookMoves: BookEntry[];
   evaluation: EvalResult;
@@ -21,6 +24,8 @@ interface BoardProps {
 export function Board({
   fen,
   onMove,
+  onSquareClick,
+  squareStyles,
   attackMap,
   bookMoves,
   evaluation,
@@ -41,8 +46,12 @@ export function Board({
 
   // Custom square renderer using react-chessboard's squareRenderer
   const squareRenderer: SquareRenderer = ({ square, children }) => {
+    const extraStyle = squareStyles?.[square];
     return (
-      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <div
+        style={{ position: "relative", width: "100%", height: "100%", ...extraStyle }}
+        onClick={() => onSquareClick?.(square as Square)}
+      >
         {children}
         <BoardSquareOverlay
           square={square as Square}
@@ -71,6 +80,15 @@ export function Board({
             lightSquareStyle: { backgroundColor: "var(--board-light)" },
             boardStyle: { width: boardWidth, height: boardWidth },
             onPieceDrop: handlePieceDrop,
+            onSquareClick: onSquareClick
+              ? ({ square }: SquareHandlerArgs) => onSquareClick(square as Square)
+              : undefined,
+            onPieceClick: onSquareClick
+              ? ({ square }: { square: string | null }) => {
+                  if (square) onSquareClick(square as Square);
+                }
+              : undefined,
+            squareStyles: squareStyles,
             squareRenderer,
           }}
         />
