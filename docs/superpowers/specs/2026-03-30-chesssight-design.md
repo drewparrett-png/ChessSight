@@ -175,6 +175,12 @@ type OpeningBook = Record<string, BookEntry[]>;
 
 The API returns all book moves available from the current position. Multiple entries per position represent branching lines (e.g., after 1.d4 d5 2.c4, there are entries for both cxd5 and Nc3).
 
+## Implementation Notes
+
+- **Stockfish ELO calibration:** Use Stockfish's `UCI_LimitStrength` and `UCI_Elo` options to constrain playing strength. These are built into the WASM build and provide reasonable ELO simulation without manual depth/randomness tuning.
+- **Opening Trainer cycling:** Next opening is random from the curated set. Weighted/sequential cycling can be added later with progress tracking.
+- **Minimum viewport:** Desktop-first, minimum 1024px width. No mobile layout in initial build.
+
 ## Out of Scope (Future)
 
 These are not part of the initial build but the architecture supports them:
