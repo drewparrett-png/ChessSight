@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { BreakDetectionModal } from "@/components/BreakDetectionModal";
 import { Chess, Square } from "chess.js";
 import { Board } from "@/components/Board";
 import { Sidebar } from "@/components/Sidebar";
@@ -80,12 +81,81 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [gameState.fen, gameState.turn, gameState.isGameOver, playerColor, mode, bookMoves, engineReady, getBestMove, makeMove, makeMoveFromSan]);
 
+  const [breakInfo, setBreakInfo] = useState<{
+    userMove: string;
+    availableBookMoves: BookEntry[];
+    userMoveEval: EvalResult;
+    bookMoveEval: EvalResult;
+  } | null>(null);
+
+  // Track whether a break just occurred
+  const [pendingBreakCheck, setPendingBreakCheck] = useState(false);
+  const preBreakBookMoves = useRef<BookEntry[]>([]);
+  const preBreakFen = useRef<string>("");
+
   const handleMove = useCallback(
     (from: Square, to: Square): boolean => {
+      if (mode === "opening-trainer") {
+        // Check if this move matches any book move
+        const clone = new Chess(gameState.fen);
+        const isBookMove = bookMoves.some((b) => {
+          try {
+            const resolved = clone.move(b.move);
+            clone.undo();
+            return resolved && resolved.from === from && resolved.to === to;
+          } catch {
+            return false;
+          }
+        });
+
+        if (!isBookMove && bookMoves.length > 0) {
+          // Save book state before the move changes it
+          preBreakBookMoves.current = [...bookMoves];
+          preBreakFen.current = gameState.fen;
+        }
+
+        const success = makeMove(from, to);
+        if (success && !isBookMove && preBreakBookMoves.current.length > 0) {
+          setPendingBreakCheck(true);
+        }
+        return success;
+      }
       return makeMove(from, to);
     },
-    [makeMove]
+    [makeMove, mode, bookMoves, gameState.fen]
   );
+
+  // Handle break detection async (after move is made and Stockfish can evaluate)
+  useEffect(() => {
+    if (!pendingBreakCheck || !engineReady) return;
+    setPendingBreakCheck(false);
+
+    const detectBreak = async () => {
+      // 1. Evaluate position after user's non-book move (current FEN)
+      const userEval = await evaluateRaw(gameState.fen) ?? { score: 0 };
+
+      // 2. Evaluate position after the first book move would have been played
+      const clone = new Chess(preBreakFen.current);
+      const firstBookMove = preBreakBookMoves.current[0];
+      let bookEval: EvalResult = { score: 0 };
+      try {
+        clone.move(firstBookMove.move);
+        bookEval = await evaluateRaw(clone.fen()) ?? { score: 0 };
+      } catch {
+        // If book move can't be played, leave bookEval at 0
+      }
+
+      const chess = getChess();
+      const history = chess.history();
+      setBreakInfo({
+        userMove: history[history.length - 1] ?? "?",
+        availableBookMoves: preBreakBookMoves.current,
+        userMoveEval: userEval,
+        bookMoveEval: bookEval,
+      });
+    };
+    detectBreak();
+  }, [pendingBreakCheck, engineReady, gameState.fen, evaluateRaw, getChess]);
 
   const handleToggle = useCallback((key: keyof ToggleState) => {
     setToggles((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -162,6 +232,22 @@ export default function Home() {
           onResign={mode !== "opening-trainer" ? resetGame : undefined}
         />
       </div>
+      {breakInfo && (
+        <BreakDetectionModal
+          userMove={breakInfo.userMove}
+          bookMoves={breakInfo.availableBookMoves}
+          userMoveEval={breakInfo.userMoveEval}
+          bookMoveEval={breakInfo.bookMoveEval}
+          onTryAgain={() => {
+            undoMove();
+            setBreakInfo(null);
+          }}
+          onNextOpening={() => {
+            resetGame();
+            setBreakInfo(null);
+          }}
+        />
+      )}
     </main>
   );
 }
